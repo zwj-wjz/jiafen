@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🎓 小学生加分系统</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#667eea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="加分系统">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  .auth-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    border-radius: 24px;
+    padding: 40px 32px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+  }
+
+  .auth-card h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    color: #2c3e50;
+    margin-bottom: 6px;
+  }
+
+  .auth-card .subtitle {
+    text-align: center;
+    color: #8a9ab0;
+    font-size: 0.9rem;
+    margin-bottom: 28px;
+  }
+
+  .auth-tabs {
+    display: flex;
+    background: #f0f3fa;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+
+  .auth-tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #7a8aa0;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+  }
+
+  .auth-tab.active {
+    background: white;
+    color: #667eea;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .auth-form .field { margin-bottom: 16px; }
+
+  .auth-form label {
+    display: block;
+    font-size: 0.85rem;
+    color: #4a5b7c;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .auth-form input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e0e6f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .auth-form input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  }
+
+  .auth-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    margin-top: 8px;
+  }
+
+  .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102, 126, 234, 0.35); }
+  .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .auth-msg {
+    text-align: center;
+    font-size: 0.88rem;
+    margin-top: 12px;
+    min-height: 20px;
+    color: #e74c3c;
+    line-height: 1.5;
+  }
+  .auth-msg.ok { color: #27ae60; }
+
+  .app-wrap { display: none; }
+  .app-wrap.show { display: block; }
+
+  header {
+    text-align: center;
+    color: white;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  header h1 {
+    font-size: 2.2rem;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 8px;
+  }
+
+  header p { opacity: 0.9; font-size: 1rem; }
+
+  .user-bar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 14px;
+    border-radius: 40px;
+    backdrop-filter: blur(8px);
+    font-size: 0.9rem;
+    color: white;
+  }
+
+  .user-bar .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: white;
+    color: #667eea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  .logout-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    color: #e74c3c;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-family: inherit;
+  }
+
+  .logout-btn:hover { background: white; }
+
+  .panel {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    margin-bottom: 20px;
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .toolbar input[type="text"] {
+    flex: 1;
+    min-width: 200px;
+    padding: 12px 18px;
+    border: 2px solid #e0e6f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .toolbar input[type="text"]:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  }
+
+  .toolbar input[type="number"] {
+    width: 90px;
+    padding: 12px;
+    border: 2px solid #e0e6f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    text-align: center;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .btn {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.15s;
+    font-family: inherit;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .btn-success { background: linear-gradient(135deg, #11998e, #38ef7d); }
+  .btn-danger  { background: linear-gradient(135deg, #eb3349, #f45c43); }
+  .btn-warn    { background: linear-gradient(135deg, #f7971e, #ffd200); color: #663c00; }
+  .btn-ghost   { background: #f0f3fa; color: #4a5b7c; }
+  .btn-ghost:hover { background: #e4e9f5; }
+
+  .students-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  .student-card {
+    background: linear-gradient(160deg, #f8faff, #eef2fb);
+    border-radius: 16px;
+    padding: 18px;
+    position: relative;
+    border: 2px solid transparent;
+    transition: all 0.25s;
+    overflow: hidden;
+  }
+
+  .student-card:hover {
+    border-color: #667eea;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.18);
+  }
+
+  .student-card.rank-1 { background: linear-gradient(160deg, #fff9e0, #ffeaa7); border-color: #f7b731; }
+  .student-card.rank-2 { background: linear-gradient(160deg, #f5f7fa, #dfe6ee); border-color: #a4b0be; }
+  .student-card.rank-3 { background: linear-gradient(160deg, #fef3e9, #f8c291); border-color: #e58e26; }
+
+  .student-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    word-break: break-all;
+  }
+
+  .rank-badge { font-size: 0.9rem; flex-shrink: 0; }
+
+  .score-display {
+    font-size: 2.6rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    margin: 6px 0 12px;
+    line-height: 1;
+    transition: transform 0.2s;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+  }
+
+  .score-display::after {
+    content: '✎';
+    position: absolute;
+    top: -4px;
+    right: calc(50% - 60px);
+    font-size: 0.9rem;
+    color: #a8b3d0;
+    -webkit-text-fill-color: #a8b3d0;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  .score-display:hover::after { opacity: 1; color: #667eea; -webkit-text-fill-color: #667eea; }
+  .score-display:hover { transform: scale(1.05); }
+  .score-display.bump { animation: bump 0.4s ease; }
+
+  @keyframes bump {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.35); }
+    100% { transform: scale(1); }
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .mini-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .mini-btn.plus  { background: #38ef7d; color: white; }
+  .mini-btn.plus:hover  { background: #2ecc71; }
+  .mini-btn.minus { background: #ff7675; color: white; }
+  .mini-btn.minus:hover { background: #e74c3c; }
+  .mini-btn.del   { background: #f0f3fa; color: #7f8c9b; flex: 0 0 40px; }
+  .mini-btn.del:hover   { background: #ffebee; color: #e74c3c; }
+
+  .empty-tip {
+    text-align: center;
+    padding: 40px 20px;
+    color: #98a2b3;
+    font-size: 1.05rem;
+  }
+
+  .empty-tip .big { font-size: 3rem; display: block; margin-bottom: 12px; }
+
+  .stats {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .stat-box {
+    flex: 1;
+    min-width: 120px;
+    background: linear-gradient(135deg, #667eea20, #764ba220);
+    border-radius: 12px;
+    padding: 12px 16px;
+    text-align: center;
+    border-left: 4px solid #667eea;
+  }
+
+  .stat-box .num { font-size: 1.6rem; font-weight: 800; color: #667eea; }
+  .stat-box .lbl { font-size: 0.85rem; color: #7a8aa0; margin-top: 2px; }
+
+  .floating-score {
+    position: fixed;
+    font-size: 2rem;
+    font-weight: 800;
+    pointer-events: none;
+    z-index: 9999;
+    animation: floatUp 1s ease-out forwards;
+  }
+
+  .floating-score.plus  { color: #38ef7d; text-shadow: 0 2px 6px rgba(56, 239, 125, 0.5); }
+  .floating-score.minus { color: #ff7675; text-shadow: 0 2px 6px rgba(255, 118, 117, 0.5); }
+
+  @keyframes floatUp {
+    0%   { opacity: 1; transform: translateY(0) scale(0.8); }
+    100% { opacity: 0; transform: translateY(-80px) scale(1.6); }
+  }
+
+  .hint {
+    font-size: 0.85rem;
+    color: #8a9ab0;
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: #f7f9ff;
+    border-radius: 10px;
+    border-left: 4px solid #b8c4e0;
+    line-height: 1.6;
+  }
+
+  .modal-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 20px;
+  }
+  .modal-mask.show { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: 20px;
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 340px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    animation: modalIn 0.25s ease;
+  }
+
+  @keyframes modalIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  .modal h3 { text-align: center; font-size: 1.15rem; color: #2c3e50; margin-bottom: 6px; }
+  .modal .student-tag { text-align: center; color: #7a8aa0; font-size: 0.9rem; margin-bottom: 18px; }
+
+  .modal input {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #e0e6f0;
+    border-radius: 12px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    text-align: center;
+    color: #667eea;
+    outline: none;
+    transition: all 0.2s;
+    font-family: inherit;
+    margin-bottom: 16px;
+  }
+
+  .modal input:focus { border-color: #667eea; box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15); }
+
+  .modal-btns { display: flex; gap: 10px; }
+
+  .modal-btns button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .modal-btns .cancel { background: #f0f3fa; color: #4a5b7c; }
+  .modal-btns .cancel:hover { background: #e4e9f5; }
+  .modal-btns .confirm { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+  .modal-btns .confirm:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(102, 126, 234, 0.35); }
+
+  .quick-scores { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 14px; }
+
+  .quick-scores button {
+    padding: 6px 12px;
+    border: 1.5px solid #e0e6f0;
+    background: white;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #4a5b7c;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+
+  .quick-scores button:hover { border-color: #667eea; color: #667eea; background: #f5f8ff; }
+
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99998;
+  }
+  .loading-overlay.show { display: flex; }
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .toast-wrap {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%);
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .toast {
+    max-width: 86vw;
+    padding: 12px 20px;
+    border-radius: 12px;
+    background: rgba(44, 62, 80, 0.95);
+    color: white;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+    animation: toastIn 0.25s ease;
+  }
+  .toast.err  { background: rgba(192, 57, 43, 0.96); }
+  .toast.ok   { background: rgba(39, 174, 96, 0.96); }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.6rem; }
+    .panel { padding: 16px; }
+    .user-bar { position: static; margin: 12px auto 0; justify-content: center; width: fit-content; }
+    .score-display::after { right: calc(50% - 50px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- 加载中遮罩 -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ==================== 登录/注册界面 ==================== -->
+<div class="auth-wrap" id="authWrap">
+  <div class="auth-card">
+    <h1>🎓 小学生加分系统</h1>
+    <p class="subtitle">☁️ 云端账号 · 电脑手机数据同步</p>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" data-tab="login">登录</div>
+      <div class="auth-tab" data-tab="register">注册</div>
+    </div>
+
+    <div class="auth-form" id="loginForm">
+      <div class="field">
+        <label>用户名</label>
+        <input type="text" id="loginUser" placeholder="输入用户名" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>密码</label>
+        <input type="password" id="loginPass" placeholder="输入密码" autocomplete="current-password">
+      </div>
+      <button class="auth-btn" id="loginBtn">登 录</button>
+      <div class="auth-msg" id="loginMsg"></div>
+    </div>
+
+    <div class="auth-form" id="registerForm" style="display:none;">
+      <div class="field">
+        <label>用户名</label>
+        <input type="text" id="regUser" placeholder="3-20 位字母、数字或下划线" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>密码</label>
+        <input type="password" id="regPass" placeholder="至少 6 位" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label>确认密码</label>
+        <input type="password" id="regPass2" placeholder="再次输入密码" autocomplete="new-password">
+      </div>
+      <button class="auth-btn" id="registerBtn">注 册</button>
+      <div class="auth-msg" id="regMsg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 加分系统主界面 ==================== -->
+<div class="app-wrap container" id="appWrap">
+  <header>
+    <h1>🎓 小学生加分系统</h1>
+    <p>让每一次进步都被看见 ✨</p>
+    <div class="user-bar">
+      <div class="avatar" id="userAvatar">U</div>
+      <span id="userNameDisplay">用户</span>
+      <button class="logout-btn" id="logoutBtn">退出</button>
+    </div>
+  </header>
+
+  <div class="panel">
+    <div class="toolbar">
+      <input type="text" id="nameInput" placeholder="输入学生姓名，多个用逗号/空格分隔" />
+      <button class="btn btn-primary" id="addBtn">➕ 添加学生</button>
+      <label style="color:#7a8aa0;font-size:0.9rem;">每次分值</label>
+      <input type="number" id="stepInput" value="1" min="1" max="100" />
+    </div>
+    <div class="hint">
+      💡 可以一次输入多个学生，例如：<b>小明, 小红, 王芳</b>。<br>
+      ☁️ 数据保存在云端，换设备登录同一账号即可同步。<br>
+      ✏️ 直接点击卡片上的<b>分数数字</b>，可以自定义输入任意分数。<br>
+      🏆 卡片会按分数从高到低自动排序，同分并列同名次。
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="stats">
+      <div class="stat-box">
+        <div class="num" id="totalStudents">0</div>
+        <div class="lbl">学生人数</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="topScore">0</div>
+        <div class="lbl">最高分</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="totalScore">0</div>
+        <div class="lbl">总分</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="avgScore">0</div>
+        <div class="lbl">平均分</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn-success" id="allPlusBtn">🌟 全班加1次分</button>
+      <button class="btn btn-warn"    id="resetScoreBtn">🔄 分数清零</button>
+      <button class="btn btn-ghost"   id="exportBtn">📤 导出成绩</button>
+      <button class="btn btn-danger"  id="clearAllBtn">🗑 清空所有学生</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="students-grid" id="studentsGrid"></div>
+    <div class="empty-tip" id="emptyTip">
+      <span class="big">👦👧</span>
+      还没有学生，先在上面添加吧～
+    </div>
+  </div>
+</div>
+
+<!-- 自定义分数弹窗 -->
+<div class="modal-mask" id="scoreModal">
+  <div class="modal">
+    <h3>✏️ 自定义分数</h3>
+    <p class="student-tag" id="modalStudentName">学生</p>
+    <div class="quick-scores" id="quickScores">
+      <button data-val="0">0</button>
+      <button data-val="5">5</button>
+      <button data-val="10">10</button>
+      <button data-val="20">20</button>
+      <button data-val="50">50</button>
+      <button data-val="100">100</button>
+    </div>
+    <input type="number" id="scoreInput" placeholder="输入分数" inputmode="numeric">
+    <div class="modal-btns">
+      <button class="cancel" id="modalCancel">取消</button>
+      <button class="confirm" id="modalConfirm">确定</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* =========================================================
+   配置
+   anon/publishable key 设计为可公开，真正的安全由数据库
+   行级安全策略(RLS)保证，切勿绕过 Supabase Auth 直连数据表
+   ========================================================= */
+const SUPABASE_URL   = 'https://umatcwaodotqpttbuwew.supabase.co';
+const SUPABASE_KEY   = 'sb_publishable_ULquGaSNnY9G11RJcKLx_g_Xmcev2ig';
+const AUTH_EMAIL_DOMAIN = 'gongdan.local';   // 用户名 + 此域构成登录邮箱，需与 Supabase 后台一致
+
+const MIN_SCORE = -999, MAX_SCORE = 9999;
+const MIN_STEP  = 1,    MAX_STEP  = 100;
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* =========================================================
+   工具函数
+   ========================================================= */
+const $ = id => document.getElementById(id);
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[m]);
+}
+
+function genId() {
+  return 'stu_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+}
+
+function clamp(n, min, max) { return Math.min(Math.max(n, min), max); }
+
+function showLoading(show) {
+  $('loadingOverlay').classList.toggle('show', show);
+}
+
+function toast(text, type) {
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || '');
+  el.textContent = text;
+  $('toastWrap').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+/** 用户名统一小写，避免大小写重复账号 */
+function normalizeName(u) { return String(u).trim().toLowerCase(); }
+function emailOf(u) { return normalizeName(u) + '@' + AUTH_EMAIL_DOMAIN; }
+
+/* =========================================================
+   写操作串行队列
+   同一学生的多次点击按顺序提交，配合服务端原子 RPC，
+   彻底消除「后发先至」导致分数被旧值覆盖的竞态
+   ========================================================= */
+let writeChain = Promise.resolve();
+function enqueueWrite(task) {
+  const p = writeChain.then(task, task);   // 前序失败不影响后续
+  writeChain = p.then(() => {}, () => {});
+  return p;
+}
+
+/* =========================================================
+   应用状态
+   ========================================================= */
+let currentUser   = null;   // 展示用的用户名
+let currentUserId = null;   // auth.users.id，写入数据时使用
+let students      = [];     // { id, name, score, created_at }
+
+const authWrap = $('authWrap');
+const appWrap  = $('appWrap');
+
+/* =========================================================
+   Tab 切换
+   ========================================================= */
+function showAuthMsg(elId, text, ok) {
+  const el = $(elId);
+  el.textContent = text || '';
+  el.className = 'auth-msg' + (ok ? ' ok' : '');
+}
+
+document.querySelectorAll('.auth-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const t = tab.dataset.tab;
+    $('loginForm').style.display    = t === 'login'    ? 'block' : 'none';
+    $('registerForm').style.display = t === 'register' ? 'block' : 'none';
+    showAuthMsg('loginMsg', '');
+    showAuthMsg('regMsg', '');
+  });
+});
+
+/* =========================================================
+   注册（Supabase Auth）
+   ========================================================= */
+$('registerBtn').addEventListener('click', async () => {
+  const username = normalizeName($('regUser').value);
+  const pass  = $('regPass').value;
+  const pass2 = $('regPass2').value;
+  showAuthMsg('regMsg', '');
+
+  if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+    showAuthMsg('regMsg', '用户名需 3-20 位，仅支持字母、数字、下划线'); return;
+  }
+  if (pass.length < 6) { showAuthMsg('regMsg', '密码至少 6 位'); return; }
+  if (pass !== pass2) { showAuthMsg('regMsg', '两次输入的密码不一致'); return; }
+
+  const btn = $('registerBtn');
+  btn.disabled = true;
+  showLoading(true);
+  try {
+    const { data, error } = await supabaseClient.auth.signUp({
+      email: emailOf(username),
+      password: pass,
+      options: { data: { username } }
+    });
+    if (error) throw error;
+
+    // Supabase 为防账号枚举，重复邮箱时返回 identities 为空的假 user
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      showAuthMsg('regMsg', '用户名已存在，请换一个');
+      return;
+    }
+    if (!data.session) {
+      showAuthMsg('regMsg', '注册成功，但尚未开启自动登录：请在 Supabase 后台关闭「Confirm email」');
+      return;
+    }
+
+    showAuthMsg('regMsg', '✅ 注册成功', true);
+    ['regUser', 'regPass', 'regPass2'].forEach(id => { $(id).value = ''; });
+
+    await enterApp(username, data.session.user.id);
+  } catch (e) {
+    console.error(e);
+    const m = String(e.message || '');
+    showAuthMsg('regMsg', /already registered/i.test(m)
+      ? '用户名已存在，请换一个'
+      : '注册失败：' + (m || '请检查网络'));
+  } finally {
+    showLoading(false);
+    btn.disabled = false;
+  }
+});
+
+/* =========================================================
+   登录（Supabase Auth）
+   ========================================================= */
+$('loginBtn').addEventListener('click', async () => {
+  const raw = $('loginUser').value.trim();
+  const pass = $('loginPass').value;
+  showAuthMsg('loginMsg', '');
+
+  if (!raw || !pass) { showAuthMsg('loginMsg', '请输入用户名和密码'); return; }
+
+  const btn = $('loginBtn');
+  btn.disabled = true;
+  showLoading(true);
+  try {
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email: emailOf(raw),
+      password: pass
+    });
+    if (error) throw error;
+
+    const username = (data.user.user_metadata && data.user.user_metadata.username) || normalizeName(raw);
+    $('loginPass').value = '';
+    await enterApp(username, data.user.id);
+  } catch (e) {
+    console.error(e);
+    const m = String(e.message || '');
+    showAuthMsg('loginMsg', /invalid login credentials/i.test(m)
+      ? '用户名或密码错误'
+      : '登录失败：' + (m || '请检查网络'));
+  } finally {
+    showLoading(false);
+    btn.disabled = false;
+  }
+});
+
+$('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') $('loginBtn').click(); });
+$('regPass2').addEventListener('keydown',  e => { if (e.key === 'Enter') $('registerBtn').click(); });
+
+/* =========================================================
+   进入 / 退出主系统
+   ========================================================= */
+async function loadStudents() {
+  const { data, error } = await supabaseClient
+    .from('students')
+    .select('id, name, score, created_at')
+    .order('score', { ascending: false })
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  students = (data || []).map(s => ({ ...s, pending: 0 }));
+}
+
+async function enterApp(username, userId) {
+  showLoading(true);
+  try {
+    await loadStudents();
+  } catch (e) {
+    console.error(e);
+    showLoading(false);
+    await supabaseClient.auth.signOut().catch(() => {});
+    exitApp();
+    toast('加载数据失败：' + (e.message || '请检查网络'), 'err');
+    return;
+  }
+  showLoading(false);
+
+  currentUser   = username;
+  currentUserId = userId;
+  $('userAvatar').textContent = username.slice(0, 1).toUpperCase();
+  $('userNameDisplay').textContent = username;
+  authWrap.style.display = 'none';
+  appWrap.classList.add('show');
+  render();
+}
+
+function exitApp() {
+  currentUser = null;
+  currentUserId = null;
+  students = [];
+  ['loginUser', 'loginPass'].forEach(id => { $(id).value = ''; });
+  showAuthMsg('loginMsg', '');
+  showAuthMsg('regMsg', '');
+  appWrap.classList.remove('show');
+  authWrap.style.display = 'flex';
+}
+
+$('logoutBtn').addEventListener('click', async () => {
+  if (!confirm('确定退出登录吗？')) return;
+  showLoading(true);
+  await supabaseClient.auth.signOut().catch(() => {});
+  showLoading(false);
+  exitApp();
+});
+
+/* =========================================================
+   学生数据操作
+   分数变更一律走服务端原子 RPC，本地仅做乐观展示
+   ========================================================= */
+
+/** 乐观地把本地分数推进一格，返回本次实际生效的增量 */
+function optimisticAdd(id, delta, trackWrites) {
+  const stu = students.find(s => s.id === id);
+  if (!stu) return 0;
+  const real = clamp(stu.score + delta, MIN_SCORE, MAX_SCORE) - stu.score;
+  stu.score += real;
+  if (trackWrites !== false) stu.pending = (stu.pending || 0) + 1;
+  return real;
+}
+
+/** 写操作结束后校正确定值：仅当没有其它请求在途时才覆盖，避免界面回跳 */
+function settleScore(id, serverScore) {
+  const stu = students.find(s => s.id === id);
+  if (!stu) return;
+  stu.pending = Math.max(0, (stu.pending || 0) - 1);
+  if (stu.pending === 0 && typeof serverScore === 'number') {
+    stu.score = clamp(serverScore, MIN_SCORE, MAX_SCORE);
+  }
+}
+
+async function addStudents() {
+  const raw = $('nameInput').value.trim();
+  if (!raw) { toast('请输入学生姓名', 'err'); return; }
+  const names = raw.split(/[,，;；\s]+/).map(n => n.trim()).filter(Boolean);
+  if (names.length === 0) return;
+  if (!currentUserId) { toast('登录状态已失效，请重新登录', 'err'); return; }
+
+  const btn = $('addBtn');
+  btn.disabled = true;
+  showLoading(true);
+  try {
+    const rows = names.map(name => ({
+      id: genId(),
+      user_id: currentUserId,
+      name,
+      score: 0
+    }));
+    const { error } = await supabaseClient.from('students').insert(rows);
+    if (error) throw error;
+
+    await loadStudents();
+    $('nameInput').value = '';
+    render();
+    toast(`已添加 ${rows.length} 名学生`, 'ok');
+  } catch (e) {
+    console.error(e);
+    toast('添加失败：' + (e.message || '请检查网络'), 'err');
+  } finally {
+    showLoading(false);
+    btn.disabled = false;
+  }
+}
+
+function changeScore(id, delta, event) {
+  const stu = students.find(s => s.id === id);
+  if (!stu) return;
+
+  const real = optimisticAdd(id, delta);
+  if (real === 0) return;
+
+  showFloatingScore(id, real, event);
+  render({ bump: [id] });
+
+  enqueueWrite(async () => {
+    try {
+      const { data, error } = await supabaseClient
+        .rpc('add_score', { p_id: id, p_delta: real });
+      if (error) throw error;
+      settleScore(id, data);
+      render();
+    } catch (e) {
+      console.error(e);
+      settleScore(id, undefined);
+      optimisticAdd(id, -real, false);   // 回滚，不再增加在途计数
+      toast('保存失败：' + (e.message || '请检查网络'), 'err');
+      render();
+    }
+  });
+}
+
+function setScore(id, newScore) {
+  const stu = students.find(s => s.id === id);
+  if (!stu) return;
+
+  const target = clamp(newScore, MIN_SCORE, MAX_SCORE);
+  const before = stu.score;
+  stu.score = target;
+  stu.pending = (stu.pending || 0) + 1;
+  render({ bump: [id] });
+
+  enqueueWrite(async () => {
+    try {
+      const { data, error } = await supabaseClient
+        .rpc('set_score', { p_id: id, p_score: target });
+      if (error) throw error;
+      settleScore(id, data);
+      render();
+    } catch (e) {
+      console.error(e);
+      settleScore(id, undefined);
+      stu.score = before;
+      toast('保存失败：' + (e.message || '请检查网络'), 'err');
+      render();
+    }
+  });
+}
+
+async function deleteStudent(id) {
+  const stu = students.find(s => s.id === id);
+  if (!stu) return;
+  if (!confirm(`确定删除「${stu.name}」吗？`)) return;
+
+  showLoading(true);
+  try {
+    const { error } = await supabaseClient.from('students').delete().eq('id', id);
+    if (error) throw error;
+    students = students.filter(s => s.id !== id);
+    render();
+    toast('已删除 ' + stu.name, 'ok');
+  } catch (e) {
+    console.error(e);
+    toast('删除失败：' + (e.message || '请检查网络'), 'err');
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function allPlus() {
+  if (students.length === 0) return;
+  if (!confirm(`确定给全班 ${students.length} 名学生各加 ${getStep()} 分吗？`)) return;
+
+  showLoading(true);
+  try {
+    const { error } = await supabaseClient.rpc('add_score_to_all', { p_step: getStep() });
+    if (error) throw error;
+    await loadStudents();
+    render();
+    toast('全班加分完成', 'ok');
+  } catch (e) {
+    console.error(e);
+    toast('操作失败：' + (e.message || '请检查网络'), 'err');
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function resetScores() {
+  if (students.length === 0) return;
+  if (!confirm('确定将所有学生的分数清零吗？')) return;
+
+  showLoading(true);
+  try {
+    const { error } = await supabaseClient.rpc('reset_all_scores');
+    if (error) throw error;
+    await loadStudents();
+    render();
+    toast('分数已全部清零', 'ok');
+  } catch (e) {
+    console.error(e);
+    toast('操作失败：' + (e.message || '请检查网络'), 'err');
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function clearAll() {
+  if (students.length === 0) return;
+  if (!confirm('确定清空所有学生吗？此操作不可恢复！')) return;
+  if (!currentUserId) { toast('登录状态已失效，请重新登录', 'err'); return; }
+
+  showLoading(true);
+  try {
+    const { error } = await supabaseClient
+      .from('students')
+      .delete()
+      .eq('user_id', currentUserId);
+    if (error) throw error;
+    students = [];
+    render();
+    toast('已清空所有学生', 'ok');
+  } catch (e) {
+    console.error(e);
+    toast('操作失败：' + (e.message || '请检查网络'), 'err');
+  } finally {
+    showLoading(false);
+  }
+}
+
+/* =========================================================
+   渲染
+   ========================================================= */
+const grid = $('studentsGrid');
+const emptyTip = $('emptyTip');
+const nameInput = $('nameInput');
+const stepInput = $('stepInput');
+
+function getStep() {
+  const v = parseInt(stepInput.value, 10);
+  return clamp(isNaN(v) ? 1 : v, MIN_STEP, MAX_STEP);
+}
+
+/** 分数降序；标准竞赛排名，同分并列 */
+function sortedStudents() {
+  return [...students].sort((a, b) =>
+    b.score - a.score ||
+    String(a.created_at).localeCompare(String(b.created_at))
+  );
+}
+
+function computeRanks(list) {
+  const map = new Map();
+  let lastScore = null, lastRank = 0;
+  list.forEach((s, i) => {
+    const rank = (lastScore !== null && s.score === lastScore) ? lastRank : i + 1;
+    map.set(s.id, rank);
+    lastScore = s.score;
+    lastRank = rank;
+  });
+  return map;
+}
+
+function render(opts) {
+  opts = opts || {};
+  const bumpIds = opts.bump || [];
+
+  // FLIP 第一步：记录旧位置
+  const prevRects = new Map();
+  grid.querySelectorAll('.student-card').forEach(el => {
+    prevRects.set(el.dataset.id, el.getBoundingClientRect());
+  });
+
+  const sorted = sortedStudents();
+  const rankMap = computeRanks(sorted);
+
+  grid.innerHTML = '';
+  emptyTip.style.display = students.length === 0 ? 'block' : 'none';
+
+  sorted.forEach(stu => {
+    const rank = rankMap.get(stu.id);
+    const card = document.createElement('div');
+    card.className = 'student-card' + (rank <= 3 ? ` rank-${rank}` : '');
+    card.dataset.id = stu.id;
+
+    let medal;
+    if (rank === 1)      medal = '🥇';
+    else if (rank === 2) medal = '🥈';
+    else if (rank === 3) medal = '🥉';
+    else medal = `<span style="color:#a0aec0;font-size:0.85rem;">No.${rank}</span>`;
+
+    card.innerHTML = `
+      <div class="student-name">
+        <span class="rank-badge">${medal}</span>
+        <span>${escapeHtml(stu.name)}</span>
+      </div>
+      <div class="score-display" data-score-id="${stu.id}" title="点击修改分数">${stu.score}</div>
+      <div class="card-actions">
+        <button class="mini-btn minus" data-act="minus" data-id="${stu.id}">－</button>
+        <button class="mini-btn plus"  data-act="plus"  data-id="${stu.id}">＋</button>
+        <button class="mini-btn del"   data-act="del"   data-id="${stu.id}" title="删除">✕</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  applyFlip(prevRects);
+
+  // bump 动画必须在重建之后触发，否则会被 DOM 重绘吃掉
+  bumpIds.forEach(id => {
+    const el = grid.querySelector(`[data-score-id="${cssEscape(id)}"]`);
+    if (el) el.classList.add('bump');
+  });
+
+  updateStats(sorted);
+}
+
+/** FLIP 第二步：让位置变化平滑过渡，而不是瞬间跳走 */
+function applyFlip(prevRects) {
+  if (prevRects.size === 0) return;
+  grid.querySelectorAll('.student-card').forEach(el => {
+    const old = prevRects.get(el.dataset.id);
+    if (!old) return;
+    const now = el.getBoundingClientRect();
+    const dx = old.left - now.left;
+    const dy = old.top - now.top;
+    if (!dx && !dy) return;
+
+    el.style.transition = 'none';
+    el.style.transform = `translate(${dx}px, ${dy}px)`;
+    requestAnimationFrame(() => {
+      el.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)';
+      el.style.transform = '';
+    });
+    setTimeout(() => { el.style.transition = ''; el.style.transform = ''; }, 420);
+  });
+}
+
+function cssEscape(v) {
+  return window.CSS && CSS.escape ? CSS.escape(v) : String(v).replace(/["\\]/g, '\\$&');
+}
+
+function updateStats(sorted) {
+  const list = sorted || sortedStudents();
+  const count = list.length;
+  const total = list.reduce((sum, s) => sum + s.score, 0);
+  const max = count ? Math.max(...list.map(s => s.score)) : 0;
+  const avg = count ? (total / count).toFixed(1) : 0;
+
+  $('totalStudents').textContent = count;
+  $('topScore').textContent = max;
+  $('totalScore').textContent = total;
+  $('avgScore').textContent = avg;
+}
+
+/* =========================================================
+   浮动 +N / -N 动画
+   ========================================================= */
+function showFloatingScore(id, delta, event) {
+  let x, y;
+  if (event && event.clientX) {
+    x = event.clientX; y = event.clientY;
+  } else {
+    const el = grid.querySelector(`[data-score-id="${cssEscape(id)}"]`);
+    if (el) { const r = el.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top; }
+    else { x = window.innerWidth / 2; y = window.innerHeight / 2; }
+  }
+  const span = document.createElement('div');
+  span.className = 'floating-score ' + (delta > 0 ? 'plus' : 'minus');
+  span.textContent = (delta > 0 ? '+' : '') + delta;
+  span.style.left = (x - 20) + 'px';
+  span.style.top = (y - 20) + 'px';
+  document.body.appendChild(span);
+  setTimeout(() => span.remove(), 1000);
+}
+
+/* =========================================================
+   自定义分数弹窗
+   ========================================================= */
+const scoreModal = $('scoreModal');
+const modalStudentName = $('modalStudentName');
+const scoreInput = $('scoreInput');
+let editingStudentId = null;
+
+function openScoreModal(id) {
+  const stu = students.find(s => s.id === id);
+  if (!stu) return;
+  editingStudentId = id;
+  modalStudentName.textContent = `学生：${stu.name}`;
+  scoreInput.value = stu.score;
+  scoreModal.classList.add('show');
+  setTimeout(() => { scoreInput.focus(); scoreInput.select(); }, 100);
+}
+
+function closeScoreModal() {
+  scoreModal.classList.remove('show');
+  editingStudentId = null;
+}
+
+function confirmScore() {
+  if (!editingStudentId) return;
+  const raw = scoreInput.value.trim();
+  const val = parseInt(raw, 10);
+  if (raw === '' || isNaN(val)) { toast('请输入有效数字', 'err'); return; }
+
+  const id = editingStudentId;
+  closeScoreModal();
+  setScore(id, val);
+}
+
+$('modalCancel').addEventListener('click', closeScoreModal);
+$('modalConfirm').addEventListener('click', confirmScore);
+
+$('quickScores').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  scoreInput.value = btn.dataset.val;
+  scoreInput.focus();
+});
+
+scoreInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmScore();
+  if (e.key === 'Escape') closeScoreModal();
+});
+
+scoreModal.addEventListener('click', e => {
+  if (e.target === scoreModal) closeScoreModal();
+});
+
+/* =========================================================
+   事件绑定
+   ========================================================= */
+$('addBtn').addEventListener('click', addStudents);
+nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') addStudents(); });
+
+grid.addEventListener('click', e => {
+  const scoreEl = e.target.closest('.score-display');
+  if (scoreEl) {
+    openScoreModal(scoreEl.dataset.scoreId);
+    return;
+  }
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const id = btn.dataset.id;
+  const act = btn.dataset.act;
+  if (act === 'plus')  changeScore(id, getStep(), e);
+  if (act === 'minus') changeScore(id, -getStep(), e);
+  if (act === 'del')   deleteStudent(id);
+});
+
+$('allPlusBtn').addEventListener('click', allPlus);
+$('resetScoreBtn').addEventListener('click', resetScores);
+$('clearAllBtn').addEventListener('click', clearAll);
+
+stepInput.addEventListener('change', () => { stepInput.value = getStep(); });
+
+/* =========================================================
+   导出 CSV（含转义与公式注入防护）
+   ========================================================= */
+function csvCell(v) {
+  let s = String(v);
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;   // 防止 Excel 执行公式
+  return '"' + s.replace(/"/g, '""') + '"';
+}
+
+$('exportBtn').addEventListener('click', () => {
+  if (students.length === 0) { toast('没有学生数据可以导出', 'err'); return; }
+  const sorted = sortedStudents();
+  const rankMap = computeRanks(sorted);
+  const lines = ['排名,姓名,分数'];
+  sorted.forEach(s => lines.push(`${rankMap.get(s.id)},${csvCell(s.name)},${s.score}`));
+
+  const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${currentUser || '成绩单'}_成绩单_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+/* =========================================================
+   启动
+   ========================================================= */
+// token 失效 / 被踢下线时自动回到登录页
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT' && currentUser) exitApp();
+  if (event === 'TOKEN_REFRESHED' && session) currentUserId = session.user.id;
+  if (event === 'SIGNED_IN' && session) currentUserId = session.user.id;
+});
+
+(async function init() {
+  authWrap.style.display = 'flex';
+  appWrap.classList.remove('show');
+
+  let session = null;
+  try {
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) throw error;
+    session = data.session;
+  } catch (e) {
+    console.error(e);
+    return;
+  }
+
+  if (session) {
+    const username = (session.user.user_metadata && session.user.user_metadata.username)
+      || normalizeName((session.user.email || '').split('@')[0]);
+    await enterApp(username, session.user.id);
+  }
+})();
+</script>
+</body>
+</html>

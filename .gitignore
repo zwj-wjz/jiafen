@@ -1,0 +1,11 @@
+# 部署临时产物
+dist/
+.wrangler/
+
+# 系统文件
+Thumbs.db
+Desktop.ini
+
+# 本地凭据/密钥（永远不要提交）
+*.token
+.env
